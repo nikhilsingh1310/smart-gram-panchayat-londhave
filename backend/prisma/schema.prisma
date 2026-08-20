@@ -1,0 +1,408 @@
+// Prisma schema for Smart Gram Panchayat Londhave Portal
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  GUEST
+  CITIZEN
+  EMPLOYEE
+  GP_ADMIN
+  SUPER_ADMIN
+}
+
+enum ContentType {
+  NEWS
+  NOTICE
+  SCHEME
+  EVENT
+  DOCUMENT
+  ANNOUNCEMENT
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ComplaintCategory {
+  WATER
+  ELECTRICITY
+  ROADS
+  GARBAGE
+  DRAINAGE
+  STREETLIGHT
+  OTHER
+}
+
+enum ComplaintPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ComplaintStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
+}
+
+enum TaxType {
+  PROPERTY_HOUSE
+  WATER
+  STREET_LIGHT
+  SANITATION
+}
+
+enum TaxStatus {
+  UNPAID
+  PAID
+  OVERDUE
+}
+
+enum CertType {
+  BIRTH
+  DEATH
+  RESIDENCE
+  NO_DUES
+  INCOME_REF
+}
+
+enum CertStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum ScheduleType {
+  WATER_SUPPLY
+  GARBAGE_COLLECTION
+  ELECTRICITY_OUTAGE
+}
+
+model User {
+  id            String       @id @default(uuid())
+  mobile        String?      @unique
+  email         String?      @unique
+  passwordHash  String?
+  name          String
+  role          Role         @default(CITIZEN)
+  preferredLang String       @default("en")
+  houseNo       String?
+  wardNo        String?
+  address       String?
+  departmentId  String?
+  department    Department?  @relation(fields: [departmentId], references: [id])
+  isVerified    Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  complaints    Complaint[]  @relation("CitizenComplaints")
+  assignedComplaints Complaint[] @relation("AssignedStaff")
+  taxBills      TaxBill[]
+  payments      Payment[]
+  certificates  CertificateApp[]
+  responses     SurveyResponse[]
+  contentItems  ContentItem[]
+
+  @@map("users")
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  name        String
+  code        String   @unique
+  description String?
+  headUserId  String?
+  users       User[]
+
+  @@map("departments")
+}
+
+model OTP {
+  id        String   @id @default(uuid())
+  mobile    String
+  code      String
+  expiresAt DateTime
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("otps")
+}
+
+model PanchayatMember {
+  id                String   @id @default(uuid())
+  name              String
+  designationEn     String
+  designationMr     String
+  designationHi     String
+  photoUrl          String?
+  contact           String
+  wardNo            String?
+  orderIndex        Int      @default(0)
+  roleDescriptionEn String?
+  roleDescriptionMr String?
+  roleDescriptionHi String?
+  isStaff           Boolean  @default(false)
+  createdAt         DateTime @default(now())
+
+  @@map("panchayat_members")
+}
+
+model VillageFacility {
+  id         String   @id @default(uuid())
+  category   String   // SCHOOL, TEMPLE, HEALTH, BANK, POST_OFFICE, TOURIST, ANGANWADI
+  nameEn     String
+  nameMr     String
+  nameHi     String
+  descEn     String?
+  descMr     String?
+  descHi     String?
+  photoUrl   String?
+  phone      String?
+  mapUrl     String?
+  orderIndex Int      @default(0)
+
+  @@map("village_facilities")
+}
+
+model VillageStat {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  labelEn     String
+  labelMr     String
+  labelHi     String
+  value       String
+  category    String   // DEMOGRAPHICS, INFRASTRUCTURE, SCHEMES, SERVICES
+  icon        String?
+  year        String   @default("2026")
+
+  @@map("village_stats")
+}
+
+model ContentItem {
+  id          String               @id @default(uuid())
+  type        ContentType
+  status      ContentStatus        @default(PUBLISHED)
+  category    String?              // e.g. Agriculture, Tender, Gram Sabha
+  isPinned    Boolean              @default(false)
+  publishAt   DateTime             @default(now())
+  authorId    String?
+  author      User?                @relation(fields: [authorId], references: [id])
+  mediaUrl    String?
+  docUrl      String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  translations ContentTranslation[]
+
+  @@map("content_items")
+}
+
+model ContentTranslation {
+  id            String      @id @default(uuid())
+  contentItemId String
+  contentItem   ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+  lang          String      // "en", "mr", "hi"
+  title         String
+  subtitle      String?
+  body          String
+  metadata      Json?       // Scheme criteria, event venue, document size, etc.
+
+  @@unique([contentItemId, lang])
+  @@map("content_translations")
+}
+
+model Complaint {
+  id                  String            @id @default(uuid())
+  ticketNo            String            @unique
+  citizenId           String
+  citizen             User              @relation("CitizenComplaints", fields: [citizenId], references: [id])
+  citizenName         String
+  citizenMobile       String
+  category            ComplaintCategory
+  priority            ComplaintPriority @default(MEDIUM)
+  status              ComplaintStatus   @default(PENDING)
+  title               String
+  description         String
+  location            String
+  wardNo              String?
+  photoUrl            String?
+  assignedToId        String?
+  assignedTo          User?             @relation("AssignedStaff", fields: [assignedToId], references: [id])
+  resolutionRemarks   String?
+  resolutionPhotoUrl  String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  history             ComplaintHistory[]
+
+  @@map("complaints")
+}
+
+model ComplaintHistory {
+  id          String   @id @default(uuid())
+  complaintId String
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  actorId     String?
+  actorName   String
+  oldStatus   ComplaintStatus
+  newStatus   ComplaintStatus
+  remarks     String?
+  createdAt   DateTime @default(now())
+
+  @@map("complaint_history")
+}
+
+model TaxBill {
+  id             String    @id @default(uuid())
+  billNo         String    @unique
+  citizenId      String
+  citizen        User      @relation(fields: [citizenId], references: [id])
+  citizenName    String
+  propertyNo     String
+  houseNo        String
+  wardNo         String
+  taxType        TaxType
+  amount         Float
+  assessmentYear String    @default("2025-2026")
+  dueDate        DateTime
+  status         TaxStatus @default(UNPAID)
+  createdAt      DateTime  @default(now())
+
+  payments       Payment[]
+
+  @@map("tax_bills")
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  transactionId String   @unique
+  billId        String
+  taxBill       TaxBill  @relation(fields: [billId], references: [id])
+  citizenId     String
+  citizen       User     @relation(fields: [citizenId], references: [id])
+  citizenName   String
+  amount        Float
+  paymentMethod String   // UPI, CREDIT_CARD, DEBIT_CARD, NET_BANKING
+  status        String   @default("SUCCESS")
+  receiptNo     String   @unique
+  paidAt        DateTime @default(now())
+
+  @@map("payments")
+}
+
+model CertificateApp {
+  id               String     @id @default(uuid())
+  applicationNo    String     @unique
+  citizenId        String
+  citizen          User       @relation(fields: [citizenId], references: [id])
+  citizenName      String
+  citizenMobile    String
+  certType         CertType
+  status           CertStatus @default(SUBMITTED)
+  applicantDetails Json       // DOB, Father Name, Reason, Address
+  docUrls          Json       // List of uploaded document URLs
+  issuedCertUrl    String?
+  adminRemarks     String?
+  appliedAt        DateTime   @default(now())
+  processedAt      DateTime?  @updatedAt
+
+  @@map("certificate_apps")
+}
+
+model UtilitySchedule {
+  id           String       @id @default(uuid())
+  type         ScheduleType
+  area         String
+  timing       String
+  status       String       @default("ACTIVE")
+  remarks      String?
+  scheduleDate String?
+
+  @@map("utility_schedules")
+}
+
+model SurveyPoll {
+  id          String   @id @default(uuid())
+  titleEn     String
+  titleMr     String
+  titleHi     String
+  descEn      String?
+  descMr      String?
+  descHi      String?
+  type        String   @default("POLL") // POLL or SURVEY
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  options     SurveyOption[]
+  responses   SurveyResponse[]
+
+  @@map("survey_polls")
+}
+
+model SurveyOption {
+  id        String     @id @default(uuid())
+  surveyId  String
+  survey    SurveyPoll @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  textEn    String
+  textMr    String
+  textHi    String
+  voteCount Int        @default(0)
+
+  responses SurveyResponse[]
+
+  @@map("survey_options")
+}
+
+model SurveyResponse {
+  id          String       @id @default(uuid())
+  surveyId    String
+  survey      SurveyPoll   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  optionId    String?
+  option      SurveyOption? @relation(fields: [optionId], references: [id])
+  citizenId   String
+  citizen     User         @relation(fields: [citizenId], references: [id])
+  feedbackText String?
+  createdAt   DateTime     @default(now())
+
+  @@map("survey_responses")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  channel   String   // PUSH, SMS, WHATSAPP
+  audience  String   // ALL, CITIZENS, STAFF, WARD
+  title     String
+  message   String
+  status    String   @default("SENT")
+  sentAt    DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actorId   String?
+  actorName String
+  actorRole String
+  action    String
+  entity    String
+  entityId  String?
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}

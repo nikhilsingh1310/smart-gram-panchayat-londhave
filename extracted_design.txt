@@ -1,0 +1,984 @@
+
+GRAM PANCHAYAT LONDHAVE
+Tal. Amalner  •  Dist. Jalgaon  •  Maharashtra
+Smart Gram Panchayat
+Digital Citizen Services Portal
+Design & Implementation Blueprint
+Trilingual  •  English  |  मराठी  |  हिंदी
+Web Portal  +  Mobile App  +  Admin Dashboard
+Version 1.0  •  Design Document
+Prepared for the Devabhau Town / Londhave Village Project
+
+Table of Contents
+TOC \h \o "1-2"
+
+
+1. Executive Summary
+This document is the design and implementation blueprint for the Smart Gram Panchayat Portal for Londhave village (Tal. Amalner, Dist. Jalgaon, Maharashtra). It translates the requirement specification into a concrete plan: information architecture, module-by-module functional design, screen layouts, a trilingual language strategy, a technology stack, a database schema, security and compliance requirements, and a phased delivery roadmap.
+The portal is a single digital platform that serves three groups. Citizens use a mobile-first website and app to access village information, submit complaints, pay taxes, apply for certificates, read notices, and track government schemes. Gram Panchayat staff use an administrative dashboard to publish content, manage complaints, and generate reports. Guests can browse public information without logging in.
+
+
+
+Priority for Version 1
+Per the project decision, the Administrative Dashboard is the top-priority module for the first release, alongside the core citizen-facing information and services it manages.
+The interface is fully trilingual — English, Marathi (मराठी) and Hindi (हिंदी) — with a language switcher available on every screen. English is the default; the user's choice is remembered.
+
+1.1 Goals
+Bring every routine Gram Panchayat service into one accessible, mobile-first digital platform.
+Reduce citizen visits to the Panchayat office by enabling online complaints, payments, and certificate applications.
+Give the administration a live dashboard with the numbers that matter — citizens, complaints, tax collection, scheme beneficiaries.
+Serve every resident in the language they are most comfortable with: English, Marathi or Hindi.
+Align with Government of India standards for e-governance (GIGW 3.0, WCAG 2.1 AA accessibility, CERT-In security).
+2. Project Overview
+2.1 Scope
+The platform consists of four connected parts that share one backend and one database:
+
+
+Component
+
+Users
+
+Purpose
+
+Citizen Web Portal (PWA)
+
+Residents, guests
+
+Browse info and use services from any browser; installable as an app.
+
+Citizen Mobile App
+
+Residents
+
+Android-first native/hybrid app with push notifications and offline caching.
+
+Admin Dashboard (Web)
+
+Sarpanch, Gramsevak, staff
+
+Content management, complaint handling, reports, user management.
+
+Backend API + Database
+
+System
+
+Business logic, data storage, integrations, security, audit logging.
+
+2.2 User Roles
+
+
+Role
+
+Access
+
+Key Capabilities
+
+Guest
+
+Public, no login
+
+View home, village info, notices, schemes, contacts, gallery, weather.
+
+Citizen (नागरिक)
+
+Mobile OTP login
+
+Everything a guest sees, plus complaints, tax payment, certificate applications, profile, surveys, and personal history.
+
+Employee / Staff
+
+Role-based login
+
+Handle assigned complaints, update statuses, add remarks, manage limited content.
+
+Gram Panchayat Admin
+
+Role-based login
+
+Full dashboard: content, complaints, users, schemes, reports, notifications, audit log.
+
+Super Admin
+
+Highest privilege
+
+Manage roles and departments, system settings, backups, audit review.
+
+
+
+
+Login model
+Citizens log in with their mobile number and a one-time password (OTP) — no passwords to remember. Staff and admins use role-based accounts with an additional password and, recommended, OTP as a second factor.
+3. Information Architecture & Sitemap
+The portal is organised so a citizen can reach any service in two taps from the home screen. The home screen surfaces the most urgent and most-used items; a persistent menu gives access to all modules.
+3.1 Home Screen
+The landing screen for every visitor contains:
+Village name (Londhave) and Gram Panchayat logo.
+Language switcher (English / मराठी / हिंदी) in the top bar.
+Important Notice banner and Emergency Contact quick-dial.
+Latest News and Upcoming Events strips.
+Village photo slider.
+Quick-action tiles: Pay Tax, File Complaint, Apply for Certificate, Notices, Schemes, Contacts.
+
+3.2 Full Module Map
+Twenty citizen-facing modules plus the Admin Panel. Each is detailed in Section 5.
+
+
+#
+
+Module
+
+#
+
+Module
+
+1
+
+Gram Panchayat Info
+
+11
+
+News
+
+2
+
+Village Info
+
+12
+
+Water Supply Schedule
+
+3
+
+Government Schemes
+
+13
+
+Garbage Collection
+
+4
+
+Complaint Management
+
+14
+
+Electricity Outage
+
+5
+
+Tax Payment
+
+15
+
+Public Announcements
+
+6
+
+Certificates
+
+16
+
+Survey / Poll
+
+7
+
+Notice Board
+
+17
+
+Important Contacts
+
+8
+
+Events
+
+18
+
+Village Development Dashboard
+
+9
+
+Gallery
+
+19
+
+Document Download
+
+10
+
+Weather
+
+20
+
+Citizen Profile
+4. Trilingual Language Strategy
+Language is a first-class feature, not an afterthought. Every screen — citizen and admin — carries a language switcher offering English, Marathi (मराठी) and Hindi (हिंदी). English is the default; once a user chooses a language, the choice is remembered for their next visit and saved to their profile if they are logged in.
+4.1 Two kinds of text, two mechanisms
+
+
+Text type
+
+Examples
+
+How it is translated
+
+Interface labels (static UI)
+
+Buttons, menu names, form field labels, error messages
+
+Resource bundles — one file per language (en, mr, hi) loaded by the app. Managed by developers/translators, versioned in code.
+
+Content (dynamic data)
+
+News, notices, scheme descriptions, event details, page text
+
+Stored in the database with a value per language. Admins enter each item in all three languages via the dashboard.
+
+4.2 How the switcher behaves
+The switcher appears in the top bar on every page (web and app) and in the admin dashboard.
+Default language is English. Changing it instantly re-renders the whole interface — no reload of data needed.
+The choice persists: stored on the device for guests, and on the account for logged-in users, so it follows them across devices.
+Fallback chain: if a content item has not yet been translated into the selected language, the portal shows English as a safe fallback and flags the missing translation to admins.
+Marathi and Hindi both use the Devanagari script; a Unicode Devanagari web font (e.g. Noto Sans Devanagari) ensures correct rendering on all devices.
+
+4.3 Content authoring in three languages
+When an admin creates a notice, news item, scheme, or event, the editor shows three tabs — English, मराठी, हिंदी. The admin fills each. To speed this up, the system can optionally pre-fill Marathi and Hindi using a government-approved machine-translation service (e.g. Bhashini / Anuvaad), which the admin then reviews and corrects before publishing. This keeps quality high while reducing manual effort.
+
+
+
+Design rule
+No screen should ever mix languages. When a language is selected, labels, buttons, dates, numbers formatting, and available content all follow that language, falling back to English only when a translation is genuinely missing.
+5. Module-by-Module Functional Design
+Each module below lists what citizens can do, what admins manage, and the key screens. Modules are numbered as in the requirement specification.
+5.1 Gram Panchayat Information (ग्रामपंचायत माहिती)
+Citizen features
+View elected representatives and staff: Sarpanch, Up-Sarpanch, Members, Gramsevak, and other employees with photo, name, designation and contact.
+See office working hours and the official contact details / address of the Gram Panchayat.
+Admin / staff features
+Add, edit and remove members and staff; upload photos; set order of display; mark current office bearers.
+Key screens: Directory grid → member detail card → contact / call action.
+5.2 Village Information (गावाची माहिती)
+Citizen features
+Read the village history and key facts (population and demographics).
+View a village map and the location of key facilities: schools, temples, health centre (dispensary), Anganwadi, bank, post office, and tourist / heritage places.
+Admin / staff features
+Maintain each facility entry (name, description, photo, map location) and the history and population figures.
+Key screens: Info landing → category list (schools, temples, etc.) → facility detail with map.
+5.3 Government Schemes (सरकारी योजना)
+Citizen features
+Browse schemes by category: Agriculture (कृषी), Women (महिला), Students (विद्यार्थी), Senior citizens (वृद्ध), Divyang (दिव्यांग), Employment (रोजगार), Jal Jeevan (जलजीवन), PMAY, PM-Kisan, Pension, and more.
+Read eligibility, benefits, required documents, and how to apply for each scheme.
+See which schemes they may qualify for and links to official application portals.
+Admin / staff features
+Add, edit and delete schemes and scheme categories; publish eligibility and documents; maintain a beneficiary count for the development dashboard.
+Key screens: Category chips → scheme list → scheme detail (eligibility, documents, apply).
+5.4 Complaint Management (तक्रार व्यवस्थापन)
+A two-sided workflow: citizens raise complaints, staff resolve them, and both sides see live status.
+Citizen features
+Submit a complaint with a category, description, priority, photo upload, and location (auto-captured via GPS or picked on a map).
+Receive a complaint ID and track status: Pending → In Progress → Completed.
+Get push/SMS updates when the status changes or a remark is added.
+Admin / staff features
+View all complaints in a queue with filters (category, priority, status, date, area).
+Assign a complaint to a staff member or department; change status; add remarks; attach resolution photos; close the complaint.
+See complaint statistics feeding the dashboard (pending vs resolved, average resolution time).
+Complaint statuses: Pending, In Progress, Completed — with a full status history trail per complaint.
+
+
+
+Field
+
+Detail
+
+Category
+
+Water, Roads, Streetlight, Drainage, Garbage, Electricity, Other
+
+Priority
+
+Low / Medium / High / Emergency
+
+Attachments
+
+Up to N photos (compressed on upload), optional short video
+
+Location
+
+GPS coordinates + area name; shown to staff on a map
+
+Lifecycle
+
+Submitted → Assigned → In Progress → Resolved/Closed (with remarks at each step)
+5.5 Tax Payment (कर भरणा)
+Citizen features
+Pay House Tax, Water Tax, Light (streetlight) Tax and Other Taxes online.
+Pay via UPI, Debit Card, Credit Card or Net Banking through a secure payment gateway.
+Download a receipt after every successful payment and see full payment history in the profile.
+Admin / staff features
+Maintain tax bills and rates per property/household; reconcile payments; view collection reports; issue/adjust bills; export tax collection data.
+Key screens: Tax dashboard (dues by type) → select bill → payment gateway → receipt download.
+
+
+
+Payments — recommended approach
+Route tax and fee payments through a government-approved aggregator. Options: PayGov India (the National Government Services payment platform) and the Bharat Bill Payment System (BBPS) for recurring utility-style bills, or a licensed gateway such as BillDesk / Razorpay that supports BBPS and UPI.
+Never store card or bank details in the portal. The gateway handles sensitive data; the portal stores only a transaction reference, amount, status and receipt.
+5.6 Certificates (प्रमाणपत्रे)
+Citizen features
+Apply online for Birth, Death, Residence, and No-Dues certificates, and reference an Income certificate application.
+Upload supporting documents, track application status, and download the certificate once approved.
+Admin / staff features
+Review applications, request corrections, approve or reject with remarks, and issue the signed/QR-verified certificate PDF.
+Key screens: Certificate list → application form + document upload → status tracker → download.
+5.7 Notice Board (सूचना फलक)
+Citizen features
+Read the latest Notices, Circulars, Tenders and Meeting notices; download attached PDFs.
+Filter by type and date; get notified of new notices.
+Admin / staff features
+Publish notices with title, body (in three languages), type, date, and PDF attachment; pin important notices; archive expired ones.
+Key screens: Notice feed → notice detail → PDF download.
+5.8 Events (कार्यक्रम)
+Citizen features
+See upcoming and past events: Gram Sabha, Health Camp, Plantation, Sports, Cultural Programs — with date, venue and details.
+Add events to a personal calendar and get reminders.
+Admin / staff features
+Create and manage events; attach photos; mark as upcoming/completed; link a gallery album.
+Key screens: Event calendar/list → event detail.
+5.9 Gallery (गॅलरी)
+Citizen features
+Browse Photos and Videos of village activities and events in albums.
+Admin / staff features
+Create albums, upload and caption photos/videos, order and feature media on the home slider.
+Key screens: Album grid → media viewer.
+5.10 Weather (हवामान)
+Citizen features
+See current weather and rain forecast for the village.
+Admin / staff features
+No manual work — data is pulled automatically from a weather API and cached.
+Key screens: Home widget + full weather screen.
+5.11 News (बातम्या)
+Citizen features
+Read Village News, District News and Government Updates.
+Admin / staff features
+Post village news in three languages; optionally auto-pull district/government feeds for review before publishing.
+Key screens: News feed → article.
+5.12 Water Supply Schedule (पाणीपुरवठा वेळापत्रक)
+Citizen features
+Check water supply timing and status by area/zone.
+Admin / staff features
+Maintain the area-wise schedule (time, status); push alerts on changes.
+Key screens: Area list → schedule table.
+5.13 Garbage Collection (कचरा संकलन)
+Citizen features
+See the collection route, date and timing for their area.
+Admin / staff features
+Maintain routes and timings; notify on changes.
+Key screens: Route + timing screen.
+5.14 Electricity Outage (वीज खंडित)
+Citizen features
+See scheduled and emergency power-cut information.
+Admin / staff features
+Post scheduled outages and emergency alerts.
+Key screens: Outage list (scheduled / emergency).
+5.15 Public Announcements (सार्वजनिक घोषणा)
+Citizen features
+Receive important announcements via push notification and SMS.
+Admin / staff features
+Compose an announcement once (three languages) and broadcast via push + SMS to selected audiences.
+Key screens: Announcement composer (admin) → citizen notification.
+5.16 Survey / Poll Module (सर्वेक्षण / मतदान)
+Citizen features
+Give feedback, vote in polls, and submit suggestions to the Panchayat.
+Admin / staff features
+Create surveys and polls; view results and citizen suggestions; export feedback.
+Key screens: Active survey/poll → vote/feedback → results (if public).
+5.17 Important Contacts (महत्त्वाचे संपर्क)
+Citizen features
+One-tap call to Police, Ambulance, Hospital, Fire, Talathi, BDO and CEO Office.
+Admin / staff features
+Maintain the contact directory and numbers.
+Key screens: Contact list with call buttons.
+5.18 Village Development Dashboard (गाव विकास डॅशबोर्ड)
+A public, at-a-glance picture of the village told through charts and graphs — distinct from the private Admin Dashboard in Section 6.
+Metrics: Population, Roads, Water Supply coverage, Schools, Health Centres, Street Lights, Trees planted, and Government Scheme beneficiaries.
+Presented as charts and graphs with year-on-year trends where data exists.
+Admins update the underlying figures; the charts refresh automatically.
+5.19 Document Download (कागदपत्रे डाउनलोड)
+Citizen features
+Download Forms, Government Resolutions (GR), Circulars and blank certificate formats as PDFs.
+Admin / staff features
+Upload and categorise documents; version and archive them.
+Key screens: Document library with category filter and search.
+5.20 Citizen Profile (नागरिक प्रोफाइल)
+A personal space, available after OTP login, tying together everything the citizen has done.
+My Applications — certificate and service applications with status.
+My Complaints — all complaints raised and their live status.
+My Payments — tax and fee history with downloadable receipts.
+My Certificates — issued certificates ready to download.
+Preferences — preferred language, notification settings, and profile details.
+
+6. Admin Dashboard — Priority Module
+
+
+
+Why this section leads the build
+The Admin Dashboard was selected as the highest-priority module for Version 1. Nothing citizens see is useful unless staff can publish and manage it, so the dashboard is delivered first and in depth.
+6.1 Dashboard Home — the numbers that matter
+On login, staff land on a metrics dashboard with live cards and trend charts:
+
+
+Metric card
+
+Shows
+
+Total Citizens
+
+Registered citizen accounts
+
+Total Complaints
+
+All complaints, all time
+
+Resolved Complaints
+
+Closed/completed, with resolution rate
+
+Pending Complaints
+
+Open items needing action, by priority
+
+Tax Collection
+
+Amount collected (today / month / year) by tax type
+
+Scheme Beneficiaries
+
+Count across schemes
+
+Active Users
+
+Citizens active in the last 30 days
+
+6.2 Content Management
+A single place to publish and maintain everything citizens read, each item authored in English, Marathi and Hindi:
+News, Notices, Gallery, Events, Schemes, and Documents — create, edit, publish, unpublish, archive.
+Three-tab (EN / मराठी / हिंदी) editor with optional machine-translation assist and a preview.
+Scheduling (publish now or later) and pinning of important items.
+
+6.3 Complaint Management (admin view)
+Queue with filters and search; assign to staff/department; change status; add remarks; close with resolution notes.
+SLA view — how long complaints have been open, flagged when overdue.
+
+6.4 User Management
+Manage Citizens, Employees and Departments; create staff accounts and assign roles/permissions.
+Role-based access control so each staff member sees only what their role allows.
+
+6.5 Reports
+Exportable to PDF and Excel:
+Complaint Report, Tax Report, Scheme Report, Citizen Report, Event Report, and User Activity Report.
+Date-range filters and department/category breakdowns.
+
+6.6 Notification System
+Send Push notifications, SMS, and WhatsApp shares from one composer.
+Target audiences (all citizens, an area, a category) and schedule sends.
+
+6.7 Global Search & Audit
+Global search across Schemes, Notices, Employees and Services.
+Audit log of every admin action (who changed what, when) for accountability and GIGW compliance.
+
+7. Screen Layouts (Wireframe Notes)
+Text wireframes describing the layout of key screens. These guide the visual designer; final UI follows the design system in Section 8.5.
+7.1 Citizen Home (mobile)
+Top bar: logo + village name (left), language switcher EN/मराठी/हिंदी (right).
+Below: scrolling Important Notice banner; Emergency call button.
+Photo slider (village images).
+Quick-action grid (2×3): Pay Tax, File Complaint, Certificate, Notices, Schemes, Contacts.
+Latest News strip; Upcoming Events strip; Weather widget.
+Bottom navigation: Home, Services, Notices, Profile.
+
+7.2 Complaint Submission
+Category picker → priority selector → description field → photo upload → location (auto/GPS + map) → Submit.
+Confirmation screen with complaint ID and expected timeline.
+
+7.3 Tax Payment
+Dues summary by tax type → select bill(s) → review amount → choose UPI/Card/Net Banking → gateway → success + receipt download.
+
+7.4 Admin Dashboard (web)
+Left sidebar: Dashboard, Content, Complaints, Users, Reports, Notifications, Settings.
+Top bar: search, language switcher, admin profile, notifications.
+Main area: metric cards row → charts (complaints trend, tax collection) → recent activity table.
+
+8. Technical Architecture
+8.1 High-level architecture
+A standard three-tier architecture: client apps talk to a single backend API, which talks to a database and to external services. This keeps the web portal, mobile app and admin dashboard consistent because they all use the same API and data.
+Clients: Citizen PWA (web), Citizen mobile app (Android-first), Admin web dashboard.
+Backend: REST/JSON API with authentication, business logic, and role-based authorization.
+Data: relational database + object storage for photos, videos and PDFs.
+Integrations: payment gateway, SMS, push, weather, and optional government platforms.
+
+8.2 Recommended technology stack
+
+
+Layer
+
+Recommended
+
+Alternative
+
+Notes
+
+Citizen web
+
+React (PWA)
+
+Next.js
+
+Installable, offline-capable, mobile-first.
+
+Mobile app
+
+Flutter
+
+React Native
+
+One codebase for Android (and iOS later).
+
+Admin dashboard
+
+React + component library
+
+Angular
+
+Data tables, charts, forms.
+
+Backend API
+
+Node.js (NestJS)
+
+ASP.NET Core Web API
+
+Both were in the spec; either is fine.
+
+Database
+
+PostgreSQL
+
+SQL Server
+
+Relational, strong Unicode/Devanagari support.
+
+File storage
+
+S3-compatible object store
+
+Server disk + CDN
+
+For photos, videos, PDFs.
+
+Localization
+
+i18n resource bundles + DB content
+
+—
+
+en / mr / hi (Section 4).
+
+Hosting
+
+MeghRaj GI Cloud / NIC
+
+AWS / Azure (India region)
+
+Data residency in India.
+
+8.3 Integrations
+
+
+Integration
+
+Purpose
+
+Suggested provider
+
+Payment gateway
+
+Tax and fee collection (UPI/card/net-banking)
+
+PayGov India / BBPS via BillDesk or Razorpay
+
+SMS gateway
+
+OTP and alerts
+
+A DLT-registered Indian SMS provider
+
+Push notifications
+
+App/PWA alerts
+
+Firebase Cloud Messaging
+
+WhatsApp share
+
+Broadcast/share notices
+
+WhatsApp Business API
+
+Weather
+
+Current + rain forecast
+
+IMD / OpenWeather API
+
+Machine translation
+
+Draft mr/hi content
+
+Bhashini / Anuvaad (Govt of India)
+
+Identity (optional)
+
+Verified login / documents
+
+DigiLocker, Aadhaar e-KYC (GIGW API)
+
+Panchayat systems (optional)
+
+Align with national records
+
+eGramSwaraj / Meri Panchayat
+
+8.4 Alignment with national e-governance platforms
+eGramSwaraj (Ministry of Panchayati Raj) is the national platform used by more than 2.7 lakh Panchayati Raj institutions for planning, accounting, asset directory and the Panchayat profile, with the citizen-facing Meri Panchayat app. The Londhave portal complements — it does not replace — these systems: it is the village's own citizen-services front door, while continuing to respect official records held in eGramSwaraj. Where APIs allow, member/profile and scheme data can be aligned to avoid double entry.
+
+8.5 Design system
+Mobile-first, large tap targets, minimal text per screen — designed for first-time smartphone users.
+Devanagari-capable typography (e.g. Noto Sans Devanagari) alongside a Latin font for English.
+High-contrast, accessible colour palette; icons paired with text labels.
+Consistent components (cards, tables, forms) reused across citizen and admin apps.
+
+9. Database Design
+A relational schema. Multilingual content uses a translation pattern: each content row has a stable record, and its language-specific text lives in a linked translations table keyed by (record, language). This keeps adding a language easy and avoids wide tables.
+9.1 Core entities
+
+
+Table
+
+Key fields
+
+Purpose
+
+users
+
+id, mobile, name, role, preferred_lang, created_at
+
+Citizens, staff, admins
+
+roles / permissions
+
+id, name, permission set
+
+Role-based access control
+
+departments
+
+id, name, head_user_id
+
+For staff and complaint assignment
+
+panchayat_members
+
+id, name, designation, photo, contact, order
+
+Sarpanch, members, staff directory
+
+village_facilities
+
+id, type, name, photo, geo, description
+
+Schools, temples, bank, etc.
+
+village_stats
+
+id, metric, value, year
+
+History/population + dashboard metrics
+
+9.2 Services & transactions
+
+
+Table
+
+Key fields
+
+Purpose
+
+complaints
+
+id, citizen_id, category, priority, status, geo, assigned_to, created_at
+
+Complaint records
+
+complaint_history
+
+id, complaint_id, status, remark, actor_id, at
+
+Full status trail
+
+complaint_media
+
+id, complaint_id, url, type
+
+Photos/video attachments
+
+tax_bills
+
+id, citizen_id, tax_type, amount, period, status
+
+Dues per household
+
+payments
+
+id, bill_id, citizen_id, amount, gateway_ref, status, receipt_url, at
+
+Payment records + receipts
+
+certificate_apps
+
+id, citizen_id, type, status, remark, issued_url, at
+
+Certificate applications
+
+app_documents
+
+id, app_id, url, doc_type
+
+Uploaded supporting docs
+
+9.3 Content & engagement
+
+
+Table
+
+Key fields
+
+Purpose
+
+content_items
+
+id, type(news/notice/scheme/event/doc), status, publish_at, pinned
+
+One row per content piece
+
+content_translations
+
+id, item_id, lang(en/mr/hi), title, body
+
+Language-specific text
+
+scheme_categories
+
+id, name, translations
+
+Agri, women, students, etc.
+
+scheme_beneficiaries
+
+id, scheme_id, count/year
+
+Dashboard figures
+
+media / albums
+
+id, album_id, url, type, caption
+
+Gallery
+
+schedules
+
+id, type(water/garbage/power), area, timing, status
+
+Utility schedules
+
+surveys / polls / votes
+
+ids, question, options, vote records
+
+Feedback module
+
+notifications
+
+id, channel, audience, message, sent_at
+
+Push/SMS/WhatsApp log
+
+contacts
+
+id, label, number, category
+
+Emergency & official numbers
+
+audit_logs
+
+id, actor_id, action, entity, before/after, at
+
+Accountability & compliance
+
+10. Security, Accessibility & Compliance
+As a government-facing platform, the portal should be built to Government of India standards from day one.
+10.1 GIGW 3.0
+The Guidelines for Indian Government Websites and apps (GIGW 3.0), maintained under the National Informatics Centre, are the benchmark for government sites. Relevant requirements the portal will follow:
+Accessibility to WCAG 2.1 Level AA — including support for users with low vision and cognitive needs, and mobile constraints.
+User-centric information architecture and a consistent, quality-monitored interface.
+Support for multilingual content and, where available, API integration with India Portal, DigiLocker, Aadhaar-based identity and single sign-on.
+A designated Web Information Manager and a lifecycle plan for quality, accessibility and security.
+STQC website-quality certification can be pursued once the site is live and stable.
+
+10.2 Security (CERT-In aligned)
+OTP-based login for citizens; role-based access control for staff; recommended second factor for admins.
+Follow OWASP Top 10 protections, the Application Security Verification Standard (ASVS), and ISO 27001 practices as referenced in GIGW 3.0's CERT-In security chapter.
+HTTPS/SSL everywhere; encrypted storage of sensitive fields; no card/bank data stored in the portal.
+Daily automated backups with periodic restore tests; audit logging of all admin actions.
+Data residency in India; regular security testing before major releases.
+
+10.3 Accessibility & inclusion
+Trilingual UI (English/Marathi/Hindi), large tap targets, and text-with-icon labels for low-literacy users.
+Screen-reader-friendly markup, sufficient colour contrast, and scalable text.
+Works on low-end Android phones and slow connections (lightweight, offline-tolerant PWA).
+11. Non-Functional Requirements
+
+
+Attribute
+
+Target
+
+Performance
+
+Home screen usable in under 3 seconds on a 3G connection; images compressed and lazy-loaded.
+
+Availability
+
+99.5%+ uptime; graceful degradation when a service (e.g. weather) is down.
+
+Scalability
+
+Handle the whole village concurrently during peak events (Gram Sabha, tax deadlines).
+
+Offline
+
+PWA caches key info (contacts, notices, schedules) for viewing without a connection.
+
+Maintainability
+
+Modular codebase; content editable by non-technical staff via the dashboard.
+
+Localization
+
+Add a future language by adding one resource bundle + translations, no code rewrite.
+
+12. Phased Build Plan & Roadmap
+Delivery is phased so value reaches citizens early, with the Admin Dashboard built first because everything else depends on staff being able to publish and manage content.
+12.1 Phases
+
+
+Phase
+
+Focus
+
+Modules delivered
+
+Indicative duration
+
+Phase 0 — Foundations
+
+Setup
+
+Design system, trilingual framework, auth (OTP + roles), hosting, database
+
+2–3 weeks
+
+Phase 1 — Admin + Core (MVP)
+
+Priority
+
+Admin Dashboard, Content Management, GP Info, Village Info, Notices, Contacts, Home, Gallery, Weather, News
+
+5–7 weeks
+
+Phase 2 — Citizen Services
+
+Transactions
+
+Complaint Management, Tax Payment, Certificates, Citizen Profile
+
+5–7 weeks
+
+Phase 3 — Engagement & Info
+
+Breadth
+
+Schemes, Events, Surveys/Polls, Schedules (water/garbage/power), Announcements, Documents, Development Dashboard
+
+4–6 weeks
+
+Phase 4 — Mobile app + Hardening
+
+Reach
+
+Android app, push/SMS/WhatsApp, reports, security testing, GIGW/STQC readiness
+
+4–6 weeks
+
+12.2 Version 1 (MVP) definition
+The first release combines Phase 0 and Phase 1: a working Admin Dashboard, the core village information modules it manages, trilingual switching, and citizen browsing — delivered as a mobile-first PWA. Payments, complaints and certificates follow in Phase 2.
+
+
+
+Recommended first milestone
+Admin Dashboard + Content Management + Home/Notices/GP Info/Contacts, fully trilingual, live as a PWA. This lets staff start publishing real content and citizens start using the portal within the first two phases — before the heavier transactional modules are built.
+
+12.3 Cost & hosting considerations
+Recurring costs: hosting/cloud, SMS (per-message), payment gateway (per-transaction fees), domain, and SSL.
+One-time: design and development, security testing, and optional STQC certification.
+Consider MeghRaj / NIC cloud for government hosting and possible cost advantages; keep data in India.
+Government schemes and CSR/Panchayat funds may support the build — align with district e-governance initiatives.
+13. Future Features
+Beyond Version 1, the platform can grow into these capabilities from the requirement specification:
+AI Chatbot for citizen queries; Voice Assistant in Marathi for low-literacy users.
+Live Gram Sabha streaming and e-Gram Sabha voting.
+CCTV monitoring integration and property GIS mapping.
+Water-meter integration and QR-code-based citizen services.
+Digital attendance for Panchayat staff.
+14. Risks & Mitigations
+
+
+Risk
+
+Mitigation
+
+Low digital literacy / adoption
+
+Icon-led trilingual UI, guest browsing, an in-person onboarding drive, and a simple 'help' assistant.
+
+Translation quality / effort
+
+Machine-translation assist with human review; English fallback; a translation-status view for admins.
+
+Payment failures / disputes
+
+Use a licensed gateway (PayGov/BBPS), always issue receipts, keep transaction logs, and provide a reconciliation report.
+
+Connectivity issues in the village
+
+Lightweight PWA with offline caching of key information; SMS fallback for critical alerts.
+
+Data security & privacy
+
+GIGW/CERT-In alignment, SSL, encryption, audit logs, daily backups, and India data residency.
+
+Content going stale
+
+Clear ownership (Web Information Manager), publish/expiry dates, and dashboard reminders.
+15. Appendix — Source Requirement Coverage
+This blueprint covers every module in the original requirement document (Londhave.docx): user types and login, home screen, the 20 citizen modules (Gram Panchayat info through Citizen Profile), the Admin Panel, the technology suggestions, reports, and future features — reorganised into a buildable design with a trilingual language layer and a phased roadmap.
+
+Prepared as a design & planning document. No production code is included; Section 12 defines how the build proceeds from here.
