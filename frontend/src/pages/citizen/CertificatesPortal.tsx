@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileText, Plus, CheckCircle2, Download, Clock, X, Send } from 'lucide-react';
+import { FileText, Plus, Download, X } from 'lucide-react';
 import { apiFetch } from '../../services/api';
 import { CertificateApp } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -84,14 +84,14 @@ export const CertificatesPortal: React.FC = () => {
       <head>
         <title>Digital Certificate - Gram Panchayat Londhave</title>
         <style>
-          body { font-family: Arial, sans-serif; padding: 40px; color: #0f172a; border: 10px double #064e3b; }
-          .header { text-align: center; border-bottom: 3px double #064e3b; padding-bottom: 15px; }
-          .header h1 { margin: 0; color: #064e3b; text-transform: uppercase; font-size: 24px; }
+          body { font-family: Arial, sans-serif; padding: 40px; color: #0f172a; border: 10px double #881337; }
+          .header { text-align: center; border-bottom: 3px double #881337; padding-bottom: 15px; }
+          .header h1 { margin: 0; color: #881337; text-transform: uppercase; font-size: 24px; }
           .header p { margin: 5px 0 0; font-size: 13px; color: #475569; }
-          .title { text-align: center; font-size: 20px; font-weight: bold; margin: 30px 0; text-decoration: underline; color: #064e3b; }
+          .title { text-align: center; font-size: 20px; font-weight: bold; margin: 30px 0; text-decoration: underline; color: #881337; }
           .body { font-size: 15px; line-height: 2; margin-top: 20px; text-align: justify; }
           .footer { margin-top: 60px; display: flex; justify-content: space-between; font-weight: bold; }
-          .seal { text-align: right; color: #064e3b; }
+          .seal { text-align: right; color: #881337; }
         </style>
       </head>
       <body>
@@ -128,36 +128,36 @@ export const CertificatesPortal: React.FC = () => {
   return (
     <div className="space-y-6 pb-16 lg:pb-6">
       {/* Banner */}
-      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-[#881337] via-[#4c0519] to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
             <FileText className="w-6 h-6 text-amber-400" />
-            प्रमाणपत्रे सेवा (Digital Certificates Portal)
+            {t('pages.certificates_title')}
           </h2>
-          <p className="text-xs text-blue-200 mt-1">
-            Apply online for Residence, Birth, Death, No-Dues, Income reference certificates and download upon approval.
+          <p className="text-xs text-rose-200 mt-1">
+            {t('pages.certificates_subtitle')}
           </p>
         </div>
 
         <button
           onClick={() => setIsApplyOpen(true)}
-          className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg flex items-center gap-2 transition-all shrink-0"
+          className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg flex items-center gap-2 transition-all shrink-0"
         >
           <Plus className="w-4 h-4" />
-          <span>Apply Online (प्रमाणपत्रासाठी अर्ज करा)</span>
+          <span>{t('home.apply_certificate')}</span>
         </button>
       </div>
 
       {/* Applications Queue */}
       <div className="space-y-4">
-        <h3 className="text-sm font-bold text-slate-900">My Certificate Applications</h3>
+        <h3 className="text-sm font-bold text-slate-900">{t('nav.certificates')}</h3>
 
         {!user ? (
           <div className="p-8 bg-amber-50 border border-amber-200 rounded-3xl text-center space-y-2">
             <p className="text-xs font-bold text-amber-900">Please log in to submit certificate requests and download issued certificates.</p>
           </div>
         ) : loading ? (
-          <div className="p-8 text-center text-slate-500 text-xs">Loading Applications...</div>
+          <div className="p-8 text-center text-slate-500 text-xs">{t('common.loading')}</div>
         ) : apps.length === 0 ? (
           <div className="p-8 text-center text-slate-500 text-xs bg-white rounded-3xl border border-slate-200">
             No certificate applications found.
@@ -171,7 +171,7 @@ export const CertificatesPortal: React.FC = () => {
                     <span className="px-2.5 py-0.5 bg-slate-900 text-white font-mono text-[11px] font-bold rounded">
                       {app.applicationNo}
                     </span>
-                    <span className="px-2.5 py-0.5 bg-blue-50 text-blue-800 text-[10px] font-bold rounded">
+                    <span className="px-2.5 py-0.5 bg-rose-50 text-[#881337] text-[10px] font-bold rounded border border-rose-200">
                       {app.certType}
                     </span>
                   </div>
@@ -184,7 +184,7 @@ export const CertificatesPortal: React.FC = () => {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900">{app.certType} Certificate Request</h4>
+                  <h4 className="text-sm font-bold text-slate-900">{app.certType} Certificate</h4>
                   <p className="text-xs text-slate-500">Applicant: {app.citizenName} • Applied on {new Date(app.appliedAt).toLocaleDateString()}</p>
                 </div>
 
@@ -196,7 +196,7 @@ export const CertificatesPortal: React.FC = () => {
                   {app.status === 'APPROVED' && (
                     <button
                       onClick={() => generateCertPDF(app)}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5"
+                      className="px-4 py-2 bg-[#881337] hover:bg-[#6b0f2b] text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5"
                     >
                       <Download className="w-4 h-4" /> Download Certificate
                     </button>
@@ -212,12 +212,12 @@ export const CertificatesPortal: React.FC = () => {
       {isApplyOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
           <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden">
-            <div className="bg-blue-900 text-white p-5 flex items-center justify-between">
+            <div className="bg-[#881337] text-white p-5 flex items-center justify-between">
               <h3 className="text-sm font-bold flex items-center gap-2">
                 <FileText className="w-5 h-5 text-amber-400" />
-                Online Certificate Application Form
+                {t('home.apply_certificate')}
               </h3>
-              <button onClick={() => setIsApplyOpen(false)} className="text-blue-200 hover:text-white">
+              <button onClick={() => setIsApplyOpen(false)} className="text-rose-200 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -278,14 +278,14 @@ export const CertificatesPortal: React.FC = () => {
                   onClick={() => setIsApplyOpen(false)}
                   className="px-4 py-2 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl shadow-md disabled:opacity-50"
+                  className="px-6 py-2 bg-[#881337] hover:bg-[#6b0f2b] text-white text-xs font-bold rounded-xl shadow-md disabled:opacity-50"
                 >
-                  {submitting ? 'Submitting...' : 'Submit Application'}
+                  {submitting ? t('common.loading') : t('common.submit')}
                 </button>
               </div>
             </form>

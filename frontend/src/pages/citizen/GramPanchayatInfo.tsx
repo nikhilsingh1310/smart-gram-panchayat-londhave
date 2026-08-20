@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, User, Phone, Clock, Mail, ShieldCheck } from 'lucide-react';
+import { Building2, Phone, Clock, Mail } from 'lucide-react';
 import { apiFetch } from '../../services/api';
 import { PanchayatMember } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 
 export const GramPanchayatInfo: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { language } = useAuth();
   const [members, setMembers] = useState<PanchayatMember[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const lang = i18n.language || 'en';
+  const lang = (language || i18n.language || 'mr').slice(0, 2);
 
   useEffect(() => {
     fetchMembers();
@@ -30,27 +32,27 @@ export const GramPanchayatInfo: React.FC = () => {
   };
 
   const getDesignation = (m: PanchayatMember) => {
-    if (lang.startsWith('mr')) return m.designationMr;
-    if (lang.startsWith('hi')) return m.designationHi;
+    if (lang.startsWith('mr')) return m.designationMr || m.designationEn;
+    if (lang.startsWith('hi')) return m.designationHi || m.designationEn;
     return m.designationEn;
   };
 
   const getDesc = (m: PanchayatMember) => {
-    if (lang.startsWith('mr')) return m.roleDescriptionMr;
-    if (lang.startsWith('hi')) return m.roleDescriptionHi;
+    if (lang.startsWith('mr')) return m.roleDescriptionMr || m.roleDescriptionEn;
+    if (lang.startsWith('hi')) return m.roleDescriptionHi || m.roleDescriptionEn;
     return m.roleDescriptionEn;
   };
 
   return (
     <div className="space-y-6 pb-16 lg:pb-6">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-emerald-900 to-teal-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl space-y-2">
+      <div className="bg-gradient-to-r from-[#881337] via-[#4c0519] to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl space-y-2">
         <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
           <Building2 className="w-6 h-6 text-amber-400" />
-          ग्रामपंचायत माहिती (Gram Panchayat Directory)
+          {t('pages.gp_info_title')}
         </h2>
-        <p className="text-xs text-emerald-200">
-          Gram Panchayat Londhave • Office Hours: Monday - Saturday (10:00 AM to 5:45 PM)
+        <p className="text-xs text-rose-200">
+          {t('pages.gp_info_subtitle')} • {t('app_name')}
         </p>
       </div>
 
@@ -67,12 +69,12 @@ export const GramPanchayatInfo: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+          <div className="w-10 h-10 rounded-2xl bg-rose-50 text-[#881337] flex items-center justify-center font-bold">
             <Phone className="w-5 h-5" />
           </div>
           <div>
             <div className="text-xs font-bold text-slate-800">Gramsevak Office Phone</div>
-            <a href="tel:9422200002" className="text-xs font-semibold text-emerald-700 hover:underline">+91 9422200002</a>
+            <a href="tel:9422200002" className="text-xs font-semibold text-[#881337] hover:underline">+91 9422200002</a>
           </div>
         </div>
 
@@ -89,16 +91,16 @@ export const GramPanchayatInfo: React.FC = () => {
 
       {/* Panchayat Members Grid */}
       <div className="space-y-4">
-        <h3 className="text-sm font-bold text-slate-900">Gram Panchayat Office Bearers & Members</h3>
+        <h3 className="text-sm font-bold text-slate-900">{t('pages.gp_info_title')}</h3>
 
         {loading ? (
-          <div className="p-8 text-center text-slate-500 text-xs">Loading Directory...</div>
+          <div className="p-8 text-center text-slate-500 text-xs">{t('common.loading')}</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {members.map((m) => (
               <div key={m.id} className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs space-y-3 hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white font-bold text-lg flex items-center justify-center shadow-md">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#881337] to-[#4c0519] text-white font-bold text-lg flex items-center justify-center shadow-md">
                     {m.name[0]}
                   </div>
                   <div>
@@ -116,12 +118,12 @@ export const GramPanchayatInfo: React.FC = () => {
                 )}
 
                 <div className="flex items-center justify-between text-xs pt-1">
-                  <span className="text-slate-500">{m.wardNo || 'Official'}</span>
+                  <span className="text-slate-500">{m.wardNo || 'Londhave GP'}</span>
                   <a
                     href={`tel:${m.contact}`}
-                    className="px-3 py-1 bg-emerald-50 text-emerald-800 font-bold text-xs rounded-xl hover:bg-emerald-100 flex items-center gap-1"
+                    className="px-3 py-1 bg-rose-50 text-[#881337] font-bold text-xs rounded-xl hover:bg-rose-100 flex items-center gap-1 border border-rose-200"
                   >
-                    <Phone className="w-3.5 h-3.5" /> Call
+                    <Phone className="w-3.5 h-3.5" /> {t('common.call_now')}
                   </a>
                 </div>
               </div>

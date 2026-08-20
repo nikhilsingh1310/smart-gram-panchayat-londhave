@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, Plus, Clock, CheckCircle2, FileText, Send, X, MapPin } from 'lucide-react';
+import { AlertCircle, Plus, X } from 'lucide-react';
 import { apiFetch } from '../../services/api';
 import { Complaint } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 
 export const ComplaintPortal: React.FC = () => {
-  const { t } = useTranslation();
-  const { user } = useAuth();
+  const { t, i18n } = useTranslation();
+  const { user, language } = useAuth();
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
@@ -20,6 +20,8 @@ export const ComplaintPortal: React.FC = () => {
   const [location, setLocation] = useState('');
   const [wardNo, setWardNo] = useState('1');
   const [submitting, setSubmitting] = useState(false);
+
+  const lang = (language || i18n.language || 'mr').slice(0, 2);
 
   useEffect(() => {
     if (user) fetchMyComplaints();
@@ -82,10 +84,10 @@ export const ComplaintPortal: React.FC = () => {
         <div>
           <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
             <AlertCircle className="w-6 h-6 text-white" />
-            तक्रार निवारण प्रणाली (Grievance Redressal)
+            {t('pages.complaints_title')}
           </h2>
           <p className="text-xs text-amber-100 mt-1">
-            Submit streetlight, water supply, drainage, or garbage issues and track live resolution updates.
+            {t('pages.complaints_subtitle')}
           </p>
         </div>
 
@@ -94,20 +96,20 @@ export const ComplaintPortal: React.FC = () => {
           className="px-5 py-2.5 bg-white text-slate-950 hover:bg-amber-50 font-extrabold text-xs rounded-xl shadow-lg flex items-center gap-2 transition-all shrink-0"
         >
           <Plus className="w-4 h-4 text-amber-600" />
-          <span>File New Complaint (तक्रार नोंदवा)</span>
+          <span>{t('home.file_complaint')}</span>
         </button>
       </div>
 
       {/* Complaints History */}
       <div className="space-y-4">
-        <h3 className="text-sm font-bold text-slate-900">My Submitted Complaints & Tracking</h3>
+        <h3 className="text-sm font-bold text-slate-900">{t('nav.complaints')}</h3>
 
         {!user ? (
           <div className="p-8 bg-amber-50 border border-amber-200 rounded-3xl text-center space-y-2">
             <p className="text-xs font-bold text-amber-900">Please log in to view your complaints & track ticket status.</p>
           </div>
         ) : loading ? (
-          <div className="p-8 text-center text-slate-500 text-xs">Loading complaints...</div>
+          <div className="p-8 text-center text-slate-500 text-xs">{t('common.loading')}</div>
         ) : complaints.length === 0 ? (
           <div className="p-8 text-center text-slate-500 text-xs bg-white rounded-3xl border border-slate-200">
             No complaints submitted yet.
@@ -143,7 +145,7 @@ export const ComplaintPortal: React.FC = () => {
 
                 {c.resolutionRemarks && (
                   <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-950 space-y-1">
-                    <div className="font-bold text-emerald-900">Gram Panchayat Resolution Remarks:</div>
+                    <div className="font-bold text-emerald-900">Resolution Remarks:</div>
                     <div>{c.resolutionRemarks}</div>
                   </div>
                 )}
@@ -160,7 +162,7 @@ export const ComplaintPortal: React.FC = () => {
             <div className="bg-amber-600 text-white p-5 flex items-center justify-between">
               <h3 className="text-sm font-bold flex items-center gap-2">
                 <AlertCircle className="w-5 h-5" />
-                File a Grievance / Complaint
+                {t('home.file_complaint')}
               </h3>
               <button onClick={() => setIsSubmitOpen(false)} className="text-amber-200 hover:text-white">
                 <X className="w-5 h-5" />
@@ -256,14 +258,14 @@ export const ComplaintPortal: React.FC = () => {
                   onClick={() => setIsSubmitOpen(false)}
                   className="px-4 py-2 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl"
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
                   className="px-6 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl shadow-md disabled:opacity-50"
                 >
-                  {submitting ? 'Submitting...' : 'Submit Complaint'}
+                  {submitting ? t('common.loading') : t('common.submit')}
                 </button>
               </div>
             </form>

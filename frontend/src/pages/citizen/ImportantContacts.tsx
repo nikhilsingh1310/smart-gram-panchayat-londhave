@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PhoneCall, ShieldAlert, Ambulance, Building, Phone } from 'lucide-react';
+import { PhoneCall, Phone } from 'lucide-react';
 import { apiFetch } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 export const ImportantContacts: React.FC = () => {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { language } = useAuth();
   const [contacts, setContacts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const lang = i18n.language || 'en';
+  const lang = (language || i18n.language || 'mr').slice(0, 2);
 
   useEffect(() => {
     fetchContacts();
@@ -30,25 +32,25 @@ export const ImportantContacts: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-16 lg:pb-6">
-      <div className="bg-gradient-to-r from-rose-700 to-red-800 text-white p-6 sm:p-8 rounded-3xl shadow-xl space-y-2">
+      <div className="bg-gradient-to-r from-[#881337] via-[#4c0519] to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl space-y-2">
         <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
           <PhoneCall className="w-6 h-6 text-amber-300" />
-          महत्त्वाचे संपर्क (Emergency & Official Directory)
+          {t('pages.contacts_title')}
         </h2>
-        <p className="text-xs text-rose-100">
-          Instant click-to-call helpline numbers for Police, Ambulance, Fire, Talathi, BDO, and Gram Panchayat officers.
+        <p className="text-xs text-rose-200">
+          {t('pages.contacts_subtitle')}
         </p>
       </div>
 
       {loading ? (
-        <div className="p-8 text-center text-slate-500 text-xs">Loading Directory...</div>
+        <div className="p-8 text-center text-slate-500 text-xs">{t('common.loading')}</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {contacts.map((c) => (
             <div key={c.id} className="bg-white p-5 rounded-3xl border border-slate-200 shadow-xs space-y-3 flex flex-col justify-between">
               <div>
                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                  c.category === 'Emergency' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'
+                  c.category === 'Emergency' ? 'bg-red-100 text-red-800' : 'bg-rose-50 text-[#881337] border border-rose-200'
                 }`}>
                   {c.category}
                 </span>
@@ -60,9 +62,9 @@ export const ImportantContacts: React.FC = () => {
 
               <a
                 href={`tel:${c.number}`}
-                className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2 transition-all"
+                className="w-full py-2.5 bg-[#881337] hover:bg-[#6b0f2b] text-white rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2 transition-all"
               >
-                <Phone className="w-3.5 h-3.5" /> Call Now
+                <Phone className="w-3.5 h-3.5" /> {t('common.call_now')}
               </a>
             </div>
           ))}

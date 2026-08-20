@@ -18,7 +18,7 @@ export const BottomNav: React.FC = () => {
     { path: '/', label: t('nav.home'), icon: Home },
     { path: '/services', label: t('nav.services'), icon: Grid },
     { path: '/notices', label: t('nav.notices'), icon: Bell },
-    { path: '/complaints', label: 'Complaints', icon: AlertCircle },
+    { path: '/complaints', label: t('nav.complaints'), icon: AlertCircle },
     { path: '/profile', label: t('nav.profile'), icon: User },
   ];
 
@@ -33,7 +33,7 @@ export const BottomNav: React.FC = () => {
               key={item.path}
               to={item.path}
               className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all ${
-                isActive ? 'text-emerald-700 font-bold scale-105' : 'text-slate-500 hover:text-slate-800'
+                isActive ? 'text-[#881337] font-bold scale-105' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5px]' : 'stroke-[1.75px]'}`} />

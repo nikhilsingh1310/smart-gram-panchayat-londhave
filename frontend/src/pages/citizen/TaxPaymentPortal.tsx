@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CreditCard, CheckCircle2, Download, QrCode, ShieldCheck, FileText, ArrowRight, X } from 'lucide-react';
+import { CreditCard, CheckCircle2, Download, QrCode, ShieldCheck, ArrowRight, X } from 'lucide-react';
 import { apiFetch } from '../../services/api';
 import { TaxBill } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -61,7 +61,6 @@ export const TaxPaymentPortal: React.FC = () => {
   };
 
   const generateReceiptPDF = (receipt: any, bill: TaxBill) => {
-    // Generate Printable HTML Window for Tax Receipt
     const printWin = window.open('', '_blank');
     if (!printWin) return;
 
@@ -72,14 +71,14 @@ export const TaxPaymentPortal: React.FC = () => {
         <title>Tax Receipt - Gram Panchayat Londhave</title>
         <style>
           body { font-family: Arial, sans-serif; padding: 30px; color: #1e293b; }
-          .header { text-align: center; border-bottom: 2px solid #064e3b; padding-bottom: 15px; }
-          .header h2 { margin: 0; color: #064e3b; }
+          .header { text-align: center; border-bottom: 2px solid #881337; padding-bottom: 15px; }
+          .header h2 { margin: 0; color: #881337; }
           .header p { margin: 5px 0 0; font-size: 13px; color: #64748b; }
           .details { margin-top: 25px; line-height: 1.8; font-size: 14px; }
           .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
           .table th, .table td { border: 1px solid #cbd5e1; padding: 10px; text-align: left; }
           .table th { background: #f1f5f9; }
-          .stamp { margin-top: 40px; text-align: right; font-weight: bold; color: #064e3b; }
+          .stamp { margin-top: 40px; text-align: right; font-weight: bold; color: #881337; }
         </style>
       </head>
       <body>
@@ -125,28 +124,28 @@ export const TaxPaymentPortal: React.FC = () => {
   return (
     <div className="space-y-6 pb-16 lg:pb-6">
       {/* Banner */}
-      <div className="bg-gradient-to-r from-emerald-950 via-emerald-900 to-teal-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-[#881337] via-[#4c0519] to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
             <CreditCard className="w-6 h-6 text-amber-400" />
-            कर भरणा व ऑनलाइन पावती (Tax Payment Portal)
+            {t('pages.taxes_title')}
           </h2>
-          <p className="text-xs text-emerald-200 mt-1">
-            Pay Property House Tax, Water Tax, Street Light Tax with instant QR Code & downloadable official receipt.
+          <p className="text-xs text-rose-200 mt-1">
+            {t('pages.taxes_subtitle')}
           </p>
         </div>
       </div>
 
       {/* Tax Bills List */}
       <div className="space-y-4">
-        <h3 className="text-sm font-bold text-slate-900">Assessed Property Tax Bills</h3>
+        <h3 className="text-sm font-bold text-slate-900">{t('nav.taxes')}</h3>
 
         {!user ? (
           <div className="p-8 bg-amber-50 border border-amber-200 rounded-3xl text-center space-y-2">
             <p className="text-xs font-bold text-amber-900">Please log in with your mobile number to view and pay your tax bills.</p>
           </div>
         ) : loading ? (
-          <div className="p-8 text-center text-slate-500 text-xs">Loading Tax Bills...</div>
+          <div className="p-8 text-center text-slate-500 text-xs">{t('common.loading')}</div>
         ) : bills.length === 0 ? (
           <div className="p-8 text-center text-slate-500 text-xs bg-white rounded-3xl border border-slate-200">
             No tax dues found for your account.
@@ -180,16 +179,16 @@ export const TaxPaymentPortal: React.FC = () => {
                   {bill.status === 'UNPAID' ? (
                     <button
                       onClick={() => { setSelectedBill(bill); setPaidReceipt(null); }}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5"
+                      className="px-4 py-2 bg-[#881337] hover:bg-[#6b0f2b] text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5"
                     >
-                      Pay Now (कर भरा) <ArrowRight className="w-3.5 h-3.5" />
+                      {t('common.pay_now')} <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   ) : (
                     <button
                       onClick={() => generateReceiptPDF(bill.payments?.[0] || { receiptNo: 'LND-REC-2026', transactionId: 'TXN-PAID' }, bill)}
                       className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5"
                     >
-                      <Download className="w-3.5 h-3.5 text-emerald-600" /> Download Receipt
+                      <Download className="w-3.5 h-3.5 text-emerald-600" /> {t('common.download_receipt')}
                     </button>
                   )}
                 </div>
@@ -203,16 +202,15 @@ export const TaxPaymentPortal: React.FC = () => {
       {selectedBill && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
           <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-emerald-950 to-teal-900 text-white p-5 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-[#881337] to-[#4c0519] text-white p-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-amber-400" />
                 <div>
-                  <h3 className="text-sm font-bold">Mock Gateway Checkout</h3>
-                  <p className="text-[10px] text-emerald-200">Gram Panchayat Londhave Sandbox Payment</p>
+                  <h3 className="text-sm font-bold">Tax Payment Gateway</h3>
+                  <p className="text-[10px] text-rose-200">Gram Panchayat Londhave Digital Checkout</p>
                 </div>
               </div>
-              <button onClick={() => setSelectedBill(null)} className="text-emerald-200 hover:text-white">
+              <button onClick={() => setSelectedBill(null)} className="text-rose-200 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -228,13 +226,12 @@ export const TaxPaymentPortal: React.FC = () => {
                     <span className="text-slate-600">Bill No:</span>
                     <span className="text-slate-900 font-mono">{selectedBill.billNo}</span>
                   </div>
-                  <div className="flex justify-between font-extrabold text-sm pt-1 border-t border-slate-200 text-emerald-800">
+                  <div className="flex justify-between font-extrabold text-sm pt-1 border-t border-slate-200 text-[#881337]">
                     <span>Total Amount Dues:</span>
                     <span>₹{selectedBill.amount.toFixed(2)}</span>
                   </div>
                 </div>
 
-                {/* Method Tabs */}
                 <div>
                   <label className="block text-xs font-bold text-slate-800 mb-2">Select Payment Method</label>
                   <div className="grid grid-cols-3 gap-2">
@@ -245,7 +242,7 @@ export const TaxPaymentPortal: React.FC = () => {
                         onClick={() => setPaymentMethod(m as any)}
                         className={`p-2.5 rounded-xl text-xs font-bold border transition-all ${
                           paymentMethod === m
-                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                            ? 'bg-[#881337] text-white border-[#881337] shadow-sm'
                             : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                         }`}
                       >
@@ -258,7 +255,7 @@ export const TaxPaymentPortal: React.FC = () => {
                 {paymentMethod === 'UPI' && (
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-2">
                     <div className="w-32 h-32 bg-white border-2 border-slate-900 p-2 rounded-xl mx-auto flex items-center justify-center font-bold text-slate-800">
-                      <QrCode className="w-24 h-24 text-emerald-800" />
+                      <QrCode className="w-24 h-24 text-[#881337]" />
                     </div>
                     <p className="text-[11px] text-slate-500 font-semibold">Scan QR with Google Pay, PhonePe, or Paytm</p>
                   </div>
@@ -268,9 +265,9 @@ export const TaxPaymentPortal: React.FC = () => {
                   type="button"
                   onClick={handlePayNow}
                   disabled={paying}
-                  className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                  className="w-full py-3.5 bg-[#881337] hover:bg-[#6b0f2b] text-white rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                 >
-                  {paying ? 'Processing Sandbox Txn...' : `Pay ₹${selectedBill.amount.toFixed(2)} Now`}
+                  {paying ? t('common.loading') : `${t('common.pay_now')} ₹${selectedBill.amount.toFixed(2)}`}
                 </button>
               </div>
             ) : (
@@ -279,22 +276,22 @@ export const TaxPaymentPortal: React.FC = () => {
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
                 <div>
-                  <h4 className="text-base font-bold text-slate-900">Payment Successful!</h4>
+                  <h4 className="text-base font-bold text-slate-900">{t('common.success')}</h4>
                   <p className="text-xs text-slate-500">Receipt No: {paidReceipt.receiptNo}</p>
                 </div>
 
                 <div className="flex gap-2">
                   <button
                     onClick={() => generateReceiptPDF(paidReceipt, selectedBill)}
-                    className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-1.5"
+                    className="flex-1 py-3 bg-[#881337] hover:bg-[#6b0f2b] text-white rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-1.5"
                   >
-                    <Download className="w-4 h-4" /> Download Official Receipt
+                    <Download className="w-4 h-4" /> {t('common.download_receipt')}
                   </button>
                   <button
                     onClick={() => setSelectedBill(null)}
                     className="py-3 px-4 border border-slate-200 text-slate-600 rounded-xl font-bold text-xs"
                   >
-                    Close
+                    {t('common.cancel')}
                   </button>
                 </div>
               </div>
