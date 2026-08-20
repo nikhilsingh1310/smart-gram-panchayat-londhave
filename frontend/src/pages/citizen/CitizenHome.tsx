@@ -8,14 +8,8 @@ import {
   Bell, 
   Award, 
   PhoneCall, 
-  CloudSun, 
-  Calendar, 
-  ChevronRight, 
-  MapPin, 
-  CheckCircle2,
-  ArrowRight,
   TrendingUp,
-  Vote
+  ArrowRight
 } from 'lucide-react';
 import { apiFetch } from '../../services/api';
 import { ContentItem } from '../../types';
@@ -49,79 +43,74 @@ export const CitizenHome: React.FC = () => {
     }
   };
 
-  const sampleNoticeCards = [
-    {
-      type: 'Event',
-      typeColor: 'bg-blue-600',
-      date: '2026-03-26',
-      title: 'राम नवमी भगवान रामाच्या जन्मोत्सावाचा पवित्र दिवस'
-    },
-    {
-      type: 'Event',
-      typeColor: 'bg-emerald-600',
-      date: '2026-03-03',
-      title: 'होळी – रंग, आनंद आणि मैत्रीचे प्रतीक म्हणून साजरा होणारा उत्सव'
-    },
-    {
-      type: 'Event',
-      typeColor: 'bg-teal-600',
-      date: '2026-01-26',
-      title: 'प्रजासत्ताक दिन २०२६ : राष्ट्राभिमान, सांस्कृतिक वैविध्य आणि संविधान सोहळा.'
-    },
-    {
-      type: 'Event',
-      typeColor: 'bg-rose-600',
-      date: '2026-05-01',
-      title: '१ मे महाराष्ट्र दिन , कामगार दिन'
-    }
-  ];
+  // Multilingual sample notice cards
+  const noticeCardData: Record<string, Array<{ type: string; typeColor: string; date: string; title: string }>> = {
+    en: [
+      { type: 'Event', typeColor: 'bg-blue-600', date: '2026-03-26', title: 'Ram Navami Celebration & Cultural Program' },
+      { type: 'Event', typeColor: 'bg-emerald-600', date: '2026-03-03', title: 'Holi Colors Festival & Village Harmony Event' },
+      { type: 'Notice', typeColor: 'bg-teal-600', date: '2026-01-26', title: 'Republic Day Flag Hoisting & Gram Sabha Assembly' },
+      { type: 'Notice', typeColor: 'bg-rose-600', date: '2026-05-01', title: 'Maharashtra Din & Worker Day Gram Sabha Meeting' }
+    ],
+    mr: [
+      { type: 'Event', typeColor: 'bg-blue-600', date: '2026-03-26', title: 'राम नवमी भगवान रामाच्या जन्मोत्सावाचा पवित्र दिवस' },
+      { type: 'Event', typeColor: 'bg-emerald-600', date: '2026-03-03', title: 'होळी – रंग, आनंद आणि मैत्रीचे प्रतीक म्हणून साजरा होणारा उत्सव' },
+      { type: 'Notice', typeColor: 'bg-teal-600', date: '2026-01-26', title: 'प्रजासत्ताक दिन २०२६ : राष्ट्राभिमान व संविधान सोहळा.' },
+      { type: 'Notice', typeColor: 'bg-rose-600', date: '2026-05-01', title: '१ मे महाराष्ट्र दिन व कामगार दिन विशेष सभा' }
+    ],
+    hi: [
+      { type: 'Event', typeColor: 'bg-blue-600', date: '2026-03-26', title: 'राम नवमी महोत्सव एवं सांस्कृतिक कार्यक्रम' },
+      { type: 'Event', typeColor: 'bg-emerald-600', date: '2026-03-03', title: 'होली – रंगों और सौहार्द का पावन उत्सव' },
+      { type: 'Notice', typeColor: 'bg-teal-600', date: '2026-01-26', title: 'गणतंत्र दिवस 2026 : ध्वजारोहण एवं ग्राम सभा बैठक' },
+      { type: 'Notice', typeColor: 'bg-rose-600', date: '2026-05-01', title: '1 मई महाराष्ट्र दिवस एवं श्रम दिवस सभा' }
+    ]
+  };
 
+  const currentNoticeCards = noticeCardData[currentLang.slice(0, 2)] || noticeCardData['en'];
+
+  // Multilingual quick service tiles
   const quickActionTiles = [
-    { title: 'कर भरणा (Tax Payment)', desc: 'घरपट्टी व पाणीपट्टी ऑनलाइन भरा', path: '/taxes', icon: CreditCard, color: 'bg-maroon-850 text-white' },
-    { title: 'तक्रार निवारण (Grievance)', desc: 'गावातील समस्यांची तक्रार नोंदवा', path: '/complaints', icon: AlertCircle, color: 'bg-amber-600 text-white' },
-    { title: 'प्रमाणपत्रे दाखला (Certificates)', desc: 'रहिवासी, जन्म, मृत्यू दाखला', path: '/certificates', icon: FileText, color: 'bg-blue-700 text-white' },
-    { title: 'सरकारी योजना (Schemes)', desc: 'पीएम किसान, आवास, जल जीवन', path: '/schemes', icon: Award, color: 'bg-teal-700 text-white' },
-    { title: 'विकास डॅशबोर्ड (Development)', desc: 'गावाचा अर्थसंकल्प व रस्ते विकास', path: '/development', icon: TrendingUp, color: 'bg-emerald-800 text-white' },
-    { title: 'महत्त्वाचे संपर्क (Contacts)', desc: '२४x७ आपत्कालीन व अधिकारी नंबर', path: '/contacts', icon: PhoneCall, color: 'bg-rose-700 text-white' },
+    { title: t('nav.taxes', 'Tax Payment'), desc: t('home.pay_tax_now', 'Pay Property & Water Tax'), path: '/taxes', icon: CreditCard, color: 'bg-[#881337] text-white' },
+    { title: t('nav.complaints', 'Grievance'), desc: t('home.file_complaint', 'File a Grievance'), path: '/complaints', icon: AlertCircle, color: 'bg-amber-600 text-white' },
+    { title: t('nav.certificates', 'Certificates'), desc: t('home.apply_certificate', 'Apply for Certificates'), path: '/certificates', icon: FileText, color: 'bg-blue-700 text-white' },
+    { title: t('nav.schemes', 'Govt Schemes'), desc: t('home.view_schemes', 'Explore Schemes'), path: '/schemes', icon: Award, color: 'bg-teal-700 text-white' },
+    { title: t('nav.development', 'Development'), desc: t('nav.development', 'Village Progress'), path: '/development', icon: TrendingUp, color: 'bg-emerald-800 text-white' },
+    { title: t('nav.contacts', 'Contacts'), desc: t('home.emergency_call', '24x7 Contacts'), path: '/contacts', icon: PhoneCall, color: 'bg-rose-700 text-white' },
   ];
 
   return (
     <div className="space-y-6 pb-16 lg:pb-6 font-devanagari">
-      {/* Hero Banner with Rural Panoramic Landscape (khamshet.in style) */}
+      {/* Hero Banner with Rural Panoramic Landscape */}
       <div className="relative rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent min-h-[360px] sm:min-h-[420px] flex items-center justify-center text-center p-6 sm:p-12 border border-slate-200">
-        {/* Background Rural Village Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center brightness-[0.75] contrast-[1.05]"
           style={{ backgroundImage: `url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80')` }}
         />
         
-        {/* Overlay Dark Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-transparent" />
 
         <div className="relative z-10 max-w-4xl space-y-4 text-white">
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight drop-shadow-lg text-white">
-            ग्रामपंचायत लोंढवे
+            {t('app_name')}
           </h2>
 
           <p className="text-xl sm:text-3xl font-bold drop-shadow-md text-amber-300">
-            ग्रामपंचायत लोंढवे मध्ये आपले स्वागत आहे!
+            {t('home.welcome')}
           </p>
 
           <p className="text-xs sm:text-sm text-slate-200 font-semibold max-w-2xl mx-auto drop-shadow-sm">
-            तालुका अमळनेर, जिल्हा जळगाव • डिजिटल नागरिक सेवा, कर भरणा, तक्रार निवारण व गाव विकास पोर्टल
+            {t('app_tagline')} • {t('smart_portal')}
           </p>
 
           <div className="flex justify-center gap-3 pt-3">
             <Link
               to="/services"
-              className="px-6 py-3 bg-maroon-850 hover:bg-maroon-800 text-white text-xs font-extrabold rounded-xl shadow-lg transition-all flex items-center gap-2 border border-maroon-700"
+              className="px-6 py-3 bg-[#881337] hover:bg-[#6b0f2b] text-white text-xs font-extrabold rounded-xl shadow-lg transition-all flex items-center gap-2 border border-maroon-700"
             >
-              सर्व नागरीक सेवा पहा <ArrowRight className="w-4 h-4" />
+              {t('nav.services')} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
 
-        {/* Carousel indicator dots */}
         <div className="absolute bottom-4 left-0 right-0 z-10 flex justify-center gap-2">
           <span className="w-6 h-1.5 bg-amber-400 rounded-full" />
           <span className="w-2 h-1.5 bg-white/60 rounded-full" />
@@ -129,36 +118,40 @@ export const CitizenHome: React.FC = () => {
         </div>
       </div>
 
-      {/* Announcement Ticker Bar (khamshet.in style: #fef3c7 cream bar with red badge) */}
+      {/* Announcement Ticker Bar */}
       <div className="bg-gold-100 border border-amber-200/80 p-3 rounded-2xl shadow-xs flex items-center gap-3 overflow-hidden text-xs font-bold text-slate-900">
         <span className="bg-red-600 text-white font-extrabold px-3 py-1 rounded-lg text-xs shrink-0 shadow-xs uppercase tracking-wide">
-          नवी घोषणा:
+          {t('home.notice_banner')}:
         </span>
         <div className="truncate text-slate-800 font-semibold">
-          सर्वांनी मिळून स्वच्छता पाळूया आणि स्वच्छ गाव घडवूया ! • स्वांतत्र्य दिन विशेष ग्रामसभा १५ ऑगस्ट रोजी सकाळी १०:०० वाजता आयोजित.
+          {currentLang.startsWith('hi') 
+            ? 'सब मिलकर स्वच्छता रखें और सुंदर गांव बनाएं! • 15 अगस्त स्वतंत्रता दिवस पर विशेष ग्राम सभा सुबह 10:00 बजे।' 
+            : currentLang.startsWith('en') 
+              ? 'Let us maintain cleanliness together for a clean village! • Special Independence Day Gram Sabha on 15th Aug at 10:00 AM.'
+              : 'सर्वांनी मिळून स्वच्छता पाळूया आणि स्वच्छ गाव घडवूया ! • स्वांतत्र्य दिन विशेष ग्रामसभा १५ ऑगस्ट रोजी सकाळी १०:०० वाजता आयोजित.'}
         </div>
       </div>
 
-      {/* Important Notices Section (khamshet.in style: | महत्त्वाची सूचना) */}
+      {/* Important Notices Section */}
       <div className="space-y-4 pt-2">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
           <div className="border-l-[5px] border-[#881337] pl-3 flex items-center">
             <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
-              महत्त्वाची सूचना
+              {t('home.notice_banner', 'Important Notices')}
             </h3>
           </div>
 
           <Link
             to="/notices"
-            className="px-4 py-2 bg-maroon-850 hover:bg-maroon-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
+            className="px-4 py-2 bg-[#881337] hover:bg-[#6b0f2b] text-white text-xs font-bold rounded-xl shadow-sm transition-all"
           >
-            सर्व घोषणा / कार्यक्रम हायलाइट्स पहा
+            {t('nav.notices')}
           </Link>
         </div>
 
-        {/* Notice Cards Grid matching screenshot */}
+        {/* Notice Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {sampleNoticeCards.map((card, idx) => (
+          {currentNoticeCards.map((card, idx) => (
             <div
               key={idx}
               className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4"
@@ -183,9 +176,9 @@ export const CitizenHome: React.FC = () => {
       {/* Dynamic Database Notices */}
       {notices.length > 0 && (
         <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 space-y-3">
-          <div className="flex items-center gap-2 text-maroon-850 font-bold text-sm">
+          <div className="flex items-center gap-2 text-[#881337] font-bold text-sm">
             <Bell className="w-4 h-4" />
-            <span>अधिकृत अद्ययावत सूचना व परिपत्रके (Official Database Notices)</span>
+            <span>{t('home.latest_news')}</span>
           </div>
 
           <div className="divide-y divide-slate-200">
@@ -210,7 +203,7 @@ export const CitizenHome: React.FC = () => {
       <div className="space-y-4 pt-2">
         <div className="border-l-[5px] border-[#881337] pl-3 flex items-center">
           <h3 className="text-xl font-extrabold text-slate-900">
-            नागरिक सेवा (Citizen Quick Services)
+            {t('home.quick_actions')}
           </h3>
         </div>
 
