@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
+  language: 'en' | 'mr' | 'hi';
   loginCitizenOTP: (mobile: string, code: string, name?: string) => Promise<void>;
   loginAdmin: (email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -19,6 +20,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('londhave_token'));
   const [loading, setLoading] = useState(true);
+  const [language, setLanguageState] = useState<'en' | 'mr' | 'hi'>(
+    (localStorage.getItem('i18nextLng') as 'en' | 'mr' | 'hi') || 'mr'
+  );
 
   useEffect(() => {
     const fetchMe = async () => {
@@ -31,7 +35,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (res.success) {
           setUser(res.user);
           if (res.user.preferredLang) {
-            i18n.changeLanguage(res.user.preferredLang);
+            const userLang = res.user.preferredLang as 'en' | 'mr' | 'hi';
+            i18n.changeLanguage(userLang);
+            setLanguageState(userLang);
+            localStorage.setItem('i18nextLng', userLang);
           }
         }
       } catch (err) {
@@ -58,7 +65,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(res.token);
       setUser(res.user);
       if (res.user.preferredLang) {
-        i18n.changeLanguage(res.user.preferredLang);
+        const userLang = res.user.preferredLang as 'en' | 'mr' | 'hi';
+        i18n.changeLanguage(userLang);
+        setLanguageState(userLang);
+        localStorage.setItem('i18nextLng', userLang);
       }
     }
   };
@@ -74,7 +84,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(res.token);
       setUser(res.user);
       if (res.user.preferredLang) {
-        i18n.changeLanguage(res.user.preferredLang);
+        const userLang = res.user.preferredLang as 'en' | 'mr' | 'hi';
+        i18n.changeLanguage(userLang);
+        setLanguageState(userLang);
+        localStorage.setItem('i18nextLng', userLang);
       }
     }
   };
@@ -88,6 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const setLanguage = (lang: 'en' | 'mr' | 'hi') => {
     i18n.changeLanguage(lang);
     localStorage.setItem('i18nextLng', lang);
+    setLanguageState(lang);
     if (user && token) {
       apiFetch('/auth/language', {
         method: 'POST',
@@ -97,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, loginCitizenOTP, loginAdmin, logout, setLanguage }}>
+    <AuthContext.Provider value={{ user, token, loading, language, loginCitizenOTP, loginAdmin, logout, setLanguage }}>
       {children}
     </AuthContext.Provider>
   );

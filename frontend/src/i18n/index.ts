@@ -6,6 +6,8 @@ import en from './locales/en.json';
 import mr from './locales/mr.json';
 import hi from './locales/hi.json';
 
+const savedLang = localStorage.getItem('i18nextLng') || 'mr';
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -15,6 +17,7 @@ i18n
       mr: { translation: mr },
       hi: { translation: hi }
     },
+    lng: savedLang,
     fallbackLng: 'en',
     supportedLngs: ['en', 'mr', 'hi'],
     detection: {
